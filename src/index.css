@@ -601,12 +601,13 @@ h1, h2, h3, h4, h5, h6 {
 /* Core Dashboard Refactor for Swiss Brutalism */
 .brutal-grid-layout {
   display: grid;
-  grid-template-columns: 280px 1fr;
-  min-height: calc(100vh - 6rem);
-  width: 92%;
-  max-width: 1250px;
-  margin: 1rem auto;
-  gap: 1.5rem;
+  grid-template-columns: 290px 1fr;
+  min-height: calc(100vh - 120px);
+  width: calc(100% - 16px);
+  max-width: 100%;
+  margin: 0 auto 8px;
+  gap: 8px;
+  box-sizing: border-box;
 }
 
 @media (max-width: 950px) {
@@ -618,16 +619,72 @@ h1, h2, h3, h4, h5, h6 {
 .brutal-sidebar {
   border: var(--border-width) solid var(--border-brutal);
   border-radius: 20px;
-  padding: 2rem 1.5rem;
+  padding: 2.5rem 1.5rem;
   background: var(--bg-card);
-  box-shadow: var(--shadow-offset) var(--shadow-offset) 0px var(--border-brutal);
+  box-shadow: none;
   height: fit-content;
+  position: sticky;
+  top: 90px;
+  box-sizing: border-box;
+}
+
+/* Nav Item Sidebar Styling */
+.nav-item {
+  font-family: var(--font-brutal-display);
+  font-weight: 800;
+  font-size: 0.85rem;
+  cursor: pointer;
+  padding: 0.8rem 1.2rem;
+  border: 2.5px solid var(--border-brutal);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: var(--bg-card);
+  color: var(--text-primary);
+  transition: all 0.15s ease;
+  box-shadow: 3px 3px 0px var(--border-brutal);
+  box-sizing: border-box;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.nav-item:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0px var(--border-brutal);
+}
+
+.nav-item:active {
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0px var(--border-brutal);
+}
+
+.nav-item.active {
+  background: var(--color-yellow) !important;
+  color: #000 !important;
+  box-shadow: 3px 3px 0px var(--border-brutal) !important;
+  transform: translate(-1px, -1px) !important;
+}
+
+/* Exit logouts style */
+.nav-item.nav-item-danger {
+  color: var(--color-danger);
+  border-color: var(--color-danger);
+  box-shadow: 3px 3px 0px var(--color-danger);
+}
+.nav-item.nav-item-danger:hover {
+  background: rgba(255, 71, 71, 0.05);
+  box-shadow: 4px 4px 0px var(--color-danger);
+}
+.nav-item.nav-item-danger:active {
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0px var(--color-danger);
 }
 
 .brutal-content-area {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 8px;
 }
 
 .dashboard-panel {
@@ -635,7 +692,7 @@ h1, h2, h3, h4, h5, h6 {
   border-radius: 20px;
   background: var(--bg-card);
   padding: 2.5rem;
-  box-shadow: var(--shadow-offset) var(--shadow-offset) 0px var(--border-brutal);
+  box-shadow: none;
 }
 
 .dashboard-card-grid {

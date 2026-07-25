@@ -794,7 +794,7 @@
 
             <div class="form-navigation">
               <button class="brutal-btn btn-student-prev" data-prev="2">← Back</button>
-              <button class="brutal-btn brutal-btn-accent" id="btn-to-step4" data-next="4">Next Step →</button>
+              <button class="brutal-btn brutal-btn-accent btn-student-next" id="btn-to-step4" data-next="4">Next Step →</button>
             </div>
           </div>
 
@@ -843,24 +843,19 @@
           </div>
 
           <div style="display:flex; flex-direction:column; gap:0.75rem;">
-            <div class="nav-item active" data-tab="overview"
-              style="font-family:var(--font-brutal-display); font-weight:800; font-size:0.85rem; cursor:pointer; padding:0.75rem 1rem; border:2px solid var(--border-brutal); border-radius:9999px; display:flex; gap:0.5rem; background:#fff;">
+            <div class="nav-item active" data-tab="overview">
               <span>📊</span> OVERVIEW
             </div>
-            <div class="nav-item" data-tab="weakness"
-              style="font-family:var(--font-brutal-display); font-weight:800; font-size:0.85rem; cursor:pointer; padding:0.75rem 1rem; border:2px solid var(--border-brutal); border-radius:9999px; display:flex; gap:0.5rem; background:#fff;">
+            <div class="nav-item" data-tab="weakness">
               <span>⚠️</span> DOMAIN GAPS
             </div>
-            <div class="nav-item" data-tab="ai-guidance"
-              style="font-family:var(--font-brutal-display); font-weight:800; font-size:0.85rem; cursor:pointer; padding:0.75rem 1rem; border:2px solid var(--border-brutal); border-radius:9999px; display:flex; gap:0.5rem; background:#fff;">
+            <div class="nav-item" data-tab="ai-guidance">
               <span>🤖</span> NVIDIA AI COACH
             </div>
-            <div class="nav-item btn-open-api-config"
-              style="font-family:var(--font-brutal-display); font-weight:800; font-size:0.85rem; cursor:pointer; padding:0.75rem 1rem; border:2px solid var(--border-brutal); border-radius:9999px; display:flex; gap:0.5rem; background:#fff;">
+            <div class="nav-item btn-open-api-config">
               <span>⚙️</span> AI CONFIG
             </div>
-            <div class="nav-item" id="btn-student-logout"
-              style="font-family:var(--font-brutal-display); font-weight:800; font-size:0.85rem; cursor:pointer; padding:0.75rem 1rem; border:2px solid var(--border-brutal); border-radius:9999px; color:var(--color-danger); display:flex; gap:0.5rem; margin-top:2rem; background:#fff;">
+            <div class="nav-item nav-item-danger" id="btn-student-logout" style="margin-top:2rem;">
               <span>🚪</span> EXIT SESSION
             </div>
           </div>
@@ -1143,16 +1138,13 @@
               style="font-size:0.75rem; color:var(--text-muted); margin-top:0.5rem; word-break:break-all;">CV Raman</p>
           </div>
           <div style="display:flex; flex-direction:column; gap:0.75rem;">
-            <div class="nav-item active"
-              style="font-family:var(--font-brutal-display); font-weight:800; font-size:0.85rem; padding:0.75rem; border:2px solid var(--border-brutal); border-radius:9999px; background:#fff; text-align:center; cursor:pointer;">
+            <div class="nav-item active">
               👥 STUDENT ROSTER
             </div>
-            <div class="nav-item btn-open-api-config"
-              style="font-family:var(--font-brutal-display); font-weight:800; font-size:0.85rem; padding:0.75rem; border:2px solid var(--border-brutal); border-radius:9999px; background:#fff; text-align:center; cursor:pointer; display:flex; gap:0.5rem; align-items:center; justify-content:center;">
+            <div class="nav-item btn-open-api-config">
               ⚙️ AI CONFIG
             </div>
-            <div class="nav-item" id="btn-teacher-logout"
-              style="font-family:var(--font-brutal-display); font-weight:800; font-size:0.85rem; cursor:pointer; padding:0.75rem; border:2px solid var(--border-brutal); border-radius:9999px; color:var(--color-danger); margin-top:4rem; background:#fff; text-align:center;">
+            <div class="nav-item nav-item-danger" id="btn-teacher-logout" style="margin-top:4rem;">
               🚪 SIGN OUT
             </div>
           </div>
@@ -1286,16 +1278,13 @@
             <p style="font-size:0.75rem; color:var(--text-muted); margin-top:0.25rem;">ADMINISTRATOR</p>
           </div>
           <div style="display:flex; flex-direction:column; gap:0.75rem;">
-            <div class="nav-item active"
-              style="font-family:var(--font-brutal-display); font-weight:800; font-size:0.85rem; padding:0.75rem; border:2px solid var(--border-brutal); border-radius:9999px; background:#fff; text-align:center; cursor:pointer;">
+            <div class="nav-item active">
               ⚙️ DEPLOYMENT
             </div>
-            <div class="nav-item btn-open-api-config"
-              style="font-family:var(--font-brutal-display); font-weight:800; font-size:0.85rem; padding:0.75rem; border:2px solid var(--border-brutal); border-radius:9999px; background:#fff; text-align:center; cursor:pointer; display:flex; gap:0.5rem; align-items:center; justify-content:center;">
+            <div class="nav-item btn-open-api-config">
               🔧 AI CONFIG
             </div>
-            <div class="nav-item" id="btn-admin-logout"
-              style="font-family:var(--font-brutal-display); font-weight:800; font-size:0.85rem; cursor:pointer; padding:0.75rem; border:2px solid var(--border-brutal); border-radius:9999px; color:var(--color-danger); margin-top:4rem; background:#fff; text-align:center;">
+            <div class="nav-item nav-item-danger" id="btn-admin-logout" style="margin-top:4rem;">
               🚪 EXIT CONTROL
             </div>
           </div>
