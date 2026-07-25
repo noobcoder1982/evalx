@@ -764,6 +764,11 @@ function generateBtechSemesterForms() {
   switchFormSemesterTab(startSem);
 }
 
+function parseScore(val) {
+  if (!val) return NaN;
+  return parseFloat(String(val).replace(/%/g, "").trim());
+}
+
 function switchFormSemesterTab(sem) {
   // Hide all panels
   document.querySelectorAll(".sem-block-panel").forEach(p => p.classList.remove("active"));
@@ -793,7 +798,7 @@ function addSubjectRowToGrid(grid, sem, name = "", score = "", isDefault = false
         <input type="hidden" class="input-subject-name" value="${name}">
       </div>
       <div>
-        <input type="number" class="brutal-input input-subject-score" placeholder="Score" min="0" max="100" value="${score}" required style="text-align:center;">
+        <input type="text" class="brutal-input input-subject-score" placeholder="Score" inputmode="decimal" value="${score}" required style="text-align:center;">
       </div>
       <div>
         <span style="font-size:1.1rem; color:var(--text-muted); cursor:not-allowed;" title="Core subject cannot be deleted">🔒</span>
@@ -805,7 +810,7 @@ function addSubjectRowToGrid(grid, sem, name = "", score = "", isDefault = false
         <input type="text" class="brutal-input input-subject-name" placeholder="Elective Course Name" value="${name}" required>
       </div>
       <div>
-        <input type="number" class="brutal-input input-subject-score" placeholder="Score" min="0" max="100" value="${score}" required style="text-align:center;">
+        <input type="text" class="brutal-input input-subject-score" placeholder="Score" inputmode="decimal" value="${score}" required style="text-align:center;">
       </div>
       <div>
         <button type="button" class="btn-remove-subject" title="Delete Elective">&times;</button>
@@ -892,7 +897,7 @@ function validateStudentStep(step) {
   
   if (step === 3) {
     if (appState.currentStudentData.timeline.tenth) {
-      const score10 = parseFloat(document.getElementById("marks-10th-score").value);
+      const score10 = parseScore(document.getElementById("marks-10th-score").value);
       if (isNaN(score10) || score10 < 0 || score10 > 100) {
         showBrutalAlert("Please enter a valid 10th Score between 0 and 100.");
         return false;
@@ -906,7 +911,7 @@ function validateStudentStep(step) {
     }
 
     if (appState.currentStudentData.timeline.twelfth) {
-      const score12 = parseFloat(document.getElementById("marks-12th-score").value);
+      const score12 = parseScore(document.getElementById("marks-12th-score").value);
       if (isNaN(score12) || score12 < 0 || score12 > 100) {
         showBrutalAlert("Please enter a valid 12th Score between 0 and 100.");
         return false;
@@ -920,7 +925,7 @@ function validateStudentStep(step) {
     }
 
     if (appState.currentStudentData.timeline.iti) {
-      const scoreIti = parseFloat(document.getElementById("marks-iti-score").value);
+      const scoreIti = parseScore(document.getElementById("marks-iti-score").value);
       if (isNaN(scoreIti) || scoreIti < 0 || scoreIti > 100) {
         showBrutalAlert("Please enter a valid ITI Score between 0 and 100.");
         return false;
@@ -934,7 +939,7 @@ function validateStudentStep(step) {
     }
 
     if (appState.currentStudentData.timeline.diploma) {
-      const scoreDip = parseFloat(document.getElementById("marks-diploma-score").value);
+      const scoreDip = parseScore(document.getElementById("marks-diploma-score").value);
       if (isNaN(scoreDip) || scoreDip < 0 || scoreDip > 100) {
         showBrutalAlert("Please enter a valid Diploma Score between 0 and 100.");
         return false;
@@ -1037,7 +1042,7 @@ document.getElementById("btn-student-submit").addEventListener("click", () => {
         const scoreInp = row.querySelector(".input-subject-score");
         
         const subName = nameInp.value.trim();
-        const subScore = parseFloat(scoreInp.value);
+        const subScore = parseScore(scoreInp.value);
 
         if (!subName || isNaN(subScore) || subScore < 0 || subScore > 100) {
           nameInp.style.borderColor = "var(--color-danger)";
