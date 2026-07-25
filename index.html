@@ -1,0 +1,1522 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="evalX - Neo-Brutalist Student Performance Tracker & Cognitive Guidance Engine">
+  <title>evalX | Student Performance Tracker & Guider</title>
+
+  <!-- CDNs: GSAP & ScrollTrigger -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="alternate icon" type="image/png" href="favicon.svg">
+  <link rel="apple-touch-icon" href="favicon.svg">
+  <meta name="theme-color" content="#0d0d0d">
+
+  <link rel="stylesheet" href="src/index.css">
+</head>
+
+<body>
+
+  <!-- ═══════════════════════════════ PRELOADER ═══════════════════════════════ -->
+  <div id="evalx-preloader">
+    <div class="preloader-inner">
+      <!-- Spinning ring -->
+      <svg class="preloader-ring" viewBox="0 0 120 120" fill="none">
+        <circle cx="60" cy="60" r="52" stroke="rgba(255,255,255,0.08)" stroke-width="4"/>
+        <circle class="preloader-arc" cx="60" cy="60" r="52" stroke="#ffe600" stroke-width="4"
+          stroke-linecap="round" stroke-dasharray="80 246"/>
+      </svg>
+      <!-- Logo -->
+      <div class="preloader-logo">
+        <span class="preloader-logo-word">eval</span><span class="preloader-logo-x">X</span>
+      </div>
+    </div>
+    <!-- Mono label -->
+    <div class="preloader-label">LOADING ACADEMIC RUNTIME</div>
+    <!-- Progress bar -->
+    <div class="preloader-bar-track"><div class="preloader-bar-fill"></div></div>
+  </div>
+
+  <style>
+    #evalx-preloader {
+      position: fixed;
+      inset: 0;
+      z-index: 99999;
+      background: #0d0d0d;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2rem;
+      transition: transform 0.85s cubic-bezier(0.76, 0, 0.24, 1);
+    }
+    #evalx-preloader.exit {
+      transform: translateY(-100%);
+    }
+    .preloader-inner {
+      position: relative;
+      width: 120px;
+      height: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .preloader-ring {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      animation: preloaderSpin 1.4s linear infinite;
+    }
+    @keyframes preloaderSpin {
+      to { transform: rotate(360deg); }
+    }
+    .preloader-logo {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 900;
+      font-size: 2rem;
+      letter-spacing: -0.05em;
+      color: #fff;
+      animation: preloaderPulse 1.4s ease-in-out infinite;
+    }
+    .preloader-logo-x { color: #ff4747; }
+    @keyframes preloaderPulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: 0.6; transform: scale(0.95); }
+    }
+    .preloader-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      color: rgba(255,255,255,0.35);
+      text-transform: uppercase;
+    }
+    .preloader-bar-track {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: rgba(255,255,255,0.06);
+      overflow: hidden;
+    }
+    .preloader-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: #ffe600;
+      animation: preloaderBar 2s ease-out forwards;
+    }
+    @keyframes preloaderBar {
+      0%   { width: 0%; }
+      60%  { width: 70%; }
+      90%  { width: 92%; }
+      100% { width: 100%; }
+    }
+  </style>
+
+  <script>
+    // Slide preloader upward after 2.2s
+    window.addEventListener('DOMContentLoaded', function () {
+      setTimeout(function () {
+        var p = document.getElementById('evalx-preloader');
+        if (p) {
+          p.classList.add('exit');
+          p.addEventListener('transitionend', function () { p.remove(); }, { once: true });
+        }
+      }, 2200);
+    });
+  </script>
+
+  <!-- SVG Clip Paths for Bento Cutouts -->
+  <svg width="0" height="0" style="position: absolute;">
+    <defs>
+      <clipPath id="hero-clip" clipPathUnits="objectBoundingBox">
+        <path
+          d="M 0.25,0.05 C 0.45,-0.05 0.75,-0.02 0.88,0.15 C 1.0,0.32 1.02,0.62 0.9,0.8 C 0.78,0.98 0.48,1.02 0.28,0.9 C 0.08,0.78 -0.02,0.48 0.1,0.25 C 0.15,0.15 0.2,0.08 0.25,0.05 Z" />
+      </clipPath>
+      <clipPath id="arch-clip" clipPathUnits="objectBoundingBox">
+        <path d="M 0,1 L 0,0.4 C 0,0.15 0.2,0 0.5,0 C 0.8,0 1,0.15 1,0.4 L 1,1 Z" />
+      </clipPath>
+      <clipPath id="organic-clip" clipPathUnits="objectBoundingBox">
+        <path
+          d="M 0.5,0.05 C 0.75,0.05 0.95,0.2 0.95,0.35 C 0.95,0.5 0.8,0.5 0.7,0.5 C 0.8,0.5 0.95,0.5 0.95,0.65 C 0.95,0.8 0.75,0.95 0.5,0.95 C 0.25,0.95 0.05,0.8 0.05,0.65 C 0.05,0.5 0.2,0.5 0.3,0.5 C 0.2,0.5 0.05,0.5 0.05,0.35 C 0.05,0.2 0.25,0.05 0.5,0.05 Z" />
+      </clipPath>
+    </defs>
+  </svg>
+
+  <!-- Full-Width Sticky Navbar (Chorke-style) -->
+  <nav class="pill-nav">
+    <a href="#home" class="logo-container" id="header-logo"
+      style="text-decoration:none; display:flex; align-items:center; gap:0.6rem;">
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none" style="flex-shrink:0;">
+        <path d="M14 2 L15.2 10.8 L23 7 L17.8 14 L23 21 L15.2 17.2 L14 26 L12.8 17.2 L5 21 L10.2 14 L5 7 L12.8 10.8 Z"
+          fill="black" />
+      </svg>
+      <span
+        style="font-family:var(--font-brutal-display); font-weight:900; font-size:1.4rem; letter-spacing:-0.04em; color:var(--text-primary);">eval<span
+          style="color:var(--color-danger);">X</span></span>
+    </a>
+
+    <div class="nav-links"
+      style="position:absolute; left:50%; transform:translateX(-50%); display:flex; align-items:center; gap:2rem;">
+      <a href="#home" class="nav-link-item active">Overview</a>
+      <a href="#student-form" class="nav-link-item">Diagnostics</a>
+      <a href="#admin-login" class="nav-link-item">Faculty</a>
+      <a href="#admin-login" class="nav-link-item">Admin</a>
+    </div>
+
+    <a href="#student-form" id="btn-nav-start"
+      style="text-decoration:none; display:inline-flex; align-items:center; justify-content:center; font-family:var(--font-brutal-display); font-weight:800; font-size:0.85rem; text-transform:uppercase; padding:0.65rem 1.5rem; border-radius:9999px; border:2.5px solid #000; background:var(--color-yellow); color:#000; letter-spacing:0.03em; transition:all 0.15s ease;">CONTACT</a>
+  </nav>
+
+  <div id="app">
+    <!-- Page: HOME SELECTOR (Neo-Brutalist Landing Page) -->
+    <!-- Page: HOME SELECTOR (Neo-Brutalist Bento Box Landing Page) -->
+    <main id="page-home" class="page active">
+
+      <!-- SECTION 1: Hero Bento Card -->
+      <div class="hero-grid" id="hero-grid-container">
+        <!-- Left Column -->
+        <div class="hero-panel-left">
+          <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:1rem;">
+            <span style="font-size:1.2rem;">👩‍🎓</span>
+            <span class="mono-tag" style="font-size:0.75rem; letter-spacing:0.05em;">// COGNITIVE ACADEMIC
+              RUNTIME</span>
+          </div>
+
+          <div class="hero-title-wrap">
+            <h1 class="hero-h1 font-brutal-display" id="hero-title" style="text-transform: none;">
+              Engineering a<br>
+              new <span
+                style="background:var(--color-green); padding:0 0.4rem; border:2.5px solid #000; border-radius:10px;">academic</span><br>
+              paradigm
+            </h1>
+          </div>
+          <p class="hero-sub">
+            evalX is a diagnostics tracker built for CV Raman Global University. Log prior qualifications, document
+            semester-wise subjects, and utilize Nvidia Llama 3 cloud AI guidance.
+          </p>
+          <div class="mt-6 flex-align gap-4" style="margin-top:2rem;">
+            <button class="brutal-btn brutal-btn-dark" id="btn-hero-start" style="padding:0.9rem 1.8rem;">Initiate
+              Diagnostics →</button>
+            <a href="#admin-login" class="brutal-btn" style="padding:0.9rem 1.8rem; background:#fff;">Faculty Login</a>
+          </div>
+        </div>
+
+        <!-- Right Column: Cutout Frame + Scalloped Badge -->
+        <div class="hero-panel-right">
+          <!-- Scalloped Seal Badge -->
+          <div class="scalloped-badge-container" id="btn-hero-badge">
+            <svg viewBox="0 0 100 100" class="scalloped-badge-svg">
+              <defs>
+                <path id="topArch" d="M 22, 50 A 28,28 0 0,1 78, 50" fill="none" />
+              </defs>
+              <path transform="translate(3, 3)"
+                d="M 41.20,17.16 Q 50.00,8.00 58.80,17.16 Q 71.00,13.63 74.04,25.96 Q 86.37,29.00 82.84,41.20 Q 92.00,50.00 82.84,58.80 Q 86.37,71.00 74.04,74.04 Q 71.00,86.37 58.80,82.84 Q 50.00,92.00 41.20,82.84 Q 29.00,86.37 25.96,74.04 Q 13.63,71.00 17.16,58.80 Q 8.00,50.00 17.16,41.20 Q 13.63,29.00 25.96,25.96 Q 29.00,13.63 41.20,17.16 Z"
+                fill="black" />
+              <path
+                d="M 41.20,17.16 Q 50.00,8.00 58.80,17.16 Q 71.00,13.63 74.04,25.96 Q 86.37,29.00 82.84,41.20 Q 92.00,50.00 82.84,58.80 Q 86.37,71.00 74.04,74.04 Q 71.00,86.37 58.80,82.84 Q 50.00,92.00 41.20,82.84 Q 29.00,86.37 25.96,74.04 Q 13.63,71.00 17.16,58.80 Q 8.00,50.00 17.16,41.20 Q 13.63,29.00 25.96,25.96 Q 29.00,13.63 41.20,17.16 Z"
+                fill="var(--color-yellow)" stroke="black" stroke-width="2.5" stroke-linejoin="round" />
+              <text font-family="var(--font-brutal-mono)" font-size="8.5" font-weight="900" fill="black"
+                letter-spacing="2">
+                <textPath href="#topArch" startOffset="50%" text-anchor="middle">GET STARTED</textPath>
+              </text>
+              <path d="M 42,49 L 58,49 M 52,43 L 58,49 L 52,55" fill="none" stroke="black" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round" />
+              <path d="M 30,60 A 22,22 0 0,0 70,60" fill="none" stroke="black" stroke-width="2.2"
+                stroke-linecap="round" />
+            </svg>
+          </div>
+
+          <div class="hero-cutout-frame" id="hero-mockup" style="border:none; box-shadow:none; background:transparent;">
+            <svg viewBox="0 0 100 100" style="width: 100%; height: 100%; display: block; overflow: visible;">
+              <defs>
+                <clipPath id="heroClip">
+                  <path
+                    d="M 25,5 C 45,-5 75,-2 88,15 C 100,32 102,62 90,80 C 78,98 48,102 28,90 C 8,78 -2,48 10,25 C 15,15 20,8 25,5 Z" />
+                </clipPath>
+              </defs>
+              <!-- Flat Black shadow -->
+              <path transform="translate(3, 3)"
+                d="M 25,5 C 45,-5 75,-2 88,15 C 100,32 102,62 90,80 C 78,98 48,102 28,90 C 8,78 -2,48 10,25 C 15,15 20,8 25,5 Z"
+                fill="black" />
+              <!-- Yellow backing shape (acts as accent edge border) -->
+              <path
+                d="M 25,5 C 45,-5 75,-2 88,15 C 100,32 102,62 90,80 C 78,98 48,102 28,90 C 8,78 -2,48 10,25 C 15,15 20,8 25,5 Z"
+                fill="var(--color-yellow)" stroke="black" stroke-width="2.5" />
+              <!-- Inner Image (slightly inset to show border and yellow padding) -->
+              <g clip-path="url(#heroClip)" transform="scale(0.95) translate(2.5, 2.5)">
+                <image href="src/collaborative_learning.png" x="0" y="0" width="100" height="100"
+                  preserveAspectRatio="xMidYMid slice" />
+              </g>
+              <!-- Outer Stroke line -->
+              <path
+                d="M 25,5 C 45,-5 75,-2 88,15 C 100,32 102,62 90,80 C 78,98 48,102 28,90 C 8,78 -2,48 10,25 C 15,15 20,8 25,5 Z"
+                fill="none" stroke="black" stroke-width="2.5" />
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 2: 3-Column Bento Cards Row -->
+      <section class="feature-section">
+        <div class="feature-cell yellow" id="feature-1">
+          <div style="font-size:1.5rem; margin-bottom:0.5rem;">💡</div>
+          <div>
+            <h3 style="text-transform: none; margin-top:0.5rem;">Academic Logging</h3>
+            <p class="mt-2" style="margin-bottom:1.5rem;">Document prior school marks and enter B.Tech subjects to
+              calculate CGPA and display SGPA timeline metrics.</p>
+            <button class="brutal-btn brutal-btn-dark btn-sm-brutal" style="font-size:0.75rem; padding:0.4rem 1rem;"
+              id="btn-explore-tracker">Learn More →</button>
+          </div>
+        </div>
+
+        <div class="feature-cell green" id="feature-2">
+          <div style="font-size:1.5rem; margin-bottom:0.5rem;">🤖</div>
+          <div>
+            <h3 style="text-transform: none; margin-top:0.5rem;">Nvidia AI Guidance</h3>
+            <p class="mt-2" style="margin-bottom:1.5rem;">Run grade records through Nvidia NIM cloud models to parse
+              subject deficiencies and synthesize study recommendations.</p>
+            <button class="brutal-btn brutal-btn-dark btn-sm-brutal" style="font-size:0.75rem; padding:0.4rem 1rem;"
+              id="btn-explore-ai">Learn More →</button>
+          </div>
+        </div>
+
+        <div class="feature-cell pink" id="feature-3">
+          <div style="font-size:1.5rem; margin-bottom:0.5rem;">👨‍🏫</div>
+          <div>
+            <h3 style="text-transform: none; margin-top:0.5rem;">Faculty Portal</h3>
+            <p class="mt-2" style="margin-bottom:1.5rem;">Educators inspect student directories, modify cohort target
+              capacities, and study domain gaps within their groups.</p>
+            <button class="brutal-btn brutal-btn-dark btn-sm-brutal" style="font-size:0.75rem; padding:0.4rem 1rem;"
+              id="btn-explore-faculty">Learn More →</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 3: Don't just trust. Verify. Bento Card -->
+      <section class="bento-card-verify">
+        <div class="verify-left">
+          <h2 style="font-size: 3rem; line-height: 1.05; margin-bottom: 1rem; text-transform:none;">
+            Don't just<br>trust. Verify.
+          </h2>
+          <p style="color:var(--text-secondary); max-width:440px; margin-bottom:2rem; font-size:0.95rem;">
+            Rigorous academic grade verification, weighted SGPA algorithms, and verifiable transcript analytics for CV
+            Raman Global University.
+          </p>
+          <a href="#student-form" class="brutal-btn"
+            style="background:#fff; border-radius:9999px; padding:0.8rem 1.6rem;">LEARN MORE</a>
+        </div>
+        <div class="verify-right">
+          <div class="arch-cutout-frame" style="border:none; box-shadow:none; background:transparent;">
+            <svg viewBox="0 0 100 100" style="width: 100%; height: 100%; display: block; overflow: visible;">
+              <defs>
+                <clipPath id="archClip">
+                  <path d="M 5,95 L 5,35 C 5,15 25,5 50,5 C 75,5 95,15 95,35 L 95,95 Z" />
+                </clipPath>
+              </defs>
+              <!-- Flat Black shadow -->
+              <path transform="translate(3, 3)" d="M 5,95 L 5,35 C 5,15 25,5 50,5 C 75,5 95,15 95,35 L 95,95 Z"
+                fill="black" />
+              <!-- Yellow backing padding accent -->
+              <path d="M 5,95 L 5,35 C 5,15 25,5 50,5 C 75,5 95,15 95,35 L 95,95 Z" fill="var(--color-pink)"
+                stroke="black" stroke-width="2.5" />
+              <!-- Image clip -->
+              <g clip-path="url(#archClip)" transform="scale(0.95) translate(2.5, 2.5)">
+                <image href="src/collaborative_learning.png" x="0" y="0" width="100" height="100"
+                  preserveAspectRatio="xMidYMid slice" />
+              </g>
+              <!-- Outline -->
+              <path d="M 5,95 L 5,35 C 5,15 25,5 50,5 C 75,5 95,15 95,35 L 95,95 Z" fill="none" stroke="black"
+                stroke-width="2.5" />
+            </svg>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- SECTION 5: 2-Column Bento Cards Row -->
+      <section class="portal-split-wrap">
+        <!-- Student Diagnostic Engine (Pastel Pink) -->
+        <div class="portal-split-box pink" id="btn-portal-student">
+          <span class="mono-tag" style="font-size:0.75rem;">[01] // STUDENT DIAGNOSTICS</span>
+          <div>
+            <h2 style="font-size: 2.2rem; margin-top:1.5rem; margin-bottom: 0.75rem; text-transform:none;">Student
+              Diagnostic Engine</h2>
+            <p style="max-width: 420px; font-size:0.85rem; color:var(--text-secondary); margin-bottom:1.5rem;">
+              Instant CGPA calculations, multi-qualification history tracking (10th / 12th / ITI / Diploma), and
+              semester breakdowns.
+            </p>
+            <button class="brutal-btn brutal-btn-dark btn-sm-brutal"
+              style="font-size:0.75rem; padding:0.4rem 1rem;">Learn More →</button>
+          </div>
+        </div>
+
+        <!-- Cohort Analytics Desk (Soft Blue) -->
+        <div class="portal-split-box blue" id="btn-portal-teacher">
+          <span class="mono-tag" style="font-size:0.75rem;">[02] // FACULTY OVERSIGHT</span>
+          <div>
+            <h2 style="font-size: 2.2rem; margin-top:1.5rem; margin-bottom: 0.75rem; text-transform:none;">Cohort
+              Analytics Desk</h2>
+            <p style="max-width: 420px; font-size:0.85rem; color:var(--text-secondary); margin-bottom:1.5rem;">
+              Market-leading cohort oversight tools offering group limit configurations, student lookup tables, and
+              domain reports.
+            </p>
+            <button class="brutal-btn brutal-btn-dark btn-sm-brutal"
+              style="font-size:0.75rem; padding:0.4rem 1rem;">Learn More →</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 6: Working together toward an intelligent campus Bento Card -->
+      <section class="bento-card-together">
+        <div class="together-left">
+          <h2 style="font-size: 2.8rem; line-height: 1.1; margin-bottom: 1rem; text-transform:none;">
+            Working together<br>toward an intelligent campus
+          </h2>
+          <p style="color:var(--text-secondary); max-width:460px; margin-bottom:2rem; font-size:0.95rem;">
+            We believe AI-assisted academic guidance will empower every student to bridge knowledge voids, understand
+            subject deficiencies, and excel.
+          </p>
+          <a href="#student-form" class="brutal-btn"
+            style="background:#fff; border-radius:9999px; padding:0.8rem 1.6rem;">ABOUT US</a>
+        </div>
+        <div class="together-right">
+          <div class="organic-cutout-frame" style="border:none; box-shadow:none; background:transparent;">
+            <svg viewBox="0 0 100 100" style="width: 100%; height: 100%; display: block; overflow: visible;">
+              <defs>
+                <clipPath id="organicClip">
+                  <path
+                    d="M 50,5 C 75,5 95,20 95,35 C 95,50 80,50 70,50 C 80,50 95,50 95,65 C 95,80 75,95 50,95 C 25,95 5,80 5,65 C 5,50 20,50 30,50 C 20,50 5,50 5,35 C 5,20 25,5 50,5 Z" />
+                </clipPath>
+              </defs>
+              <!-- Flat Black shadow -->
+              <path transform="translate(3, 3)"
+                d="M 50,5 C 75,5 95,20 95,35 C 95,50 80,50 70,50 C 80,50 95,50 95,65 C 95,80 75,95 50,95 C 25,95 5,80 5,65 C 5,50 20,50 30,50 C 20,50 5,50 5,35 C 5,20 25,5 50,5 Z"
+                fill="black" />
+              <!-- Background pink padding shape -->
+              <path
+                d="M 50,5 C 75,5 95,20 95,35 C 95,50 80,50 70,50 C 80,50 95,50 95,65 C 95,80 75,95 50,95 C 25,95 5,80 5,65 C 5,50 20,50 30,50 C 20,50 5,50 5,35 C 5,20 25,5 50,5 Z"
+                fill="var(--color-blue)" stroke="black" stroke-width="2.5" />
+              <!-- Image clip -->
+              <g clip-path="url(#organicClip)" transform="scale(0.95) translate(2.5, 2.5)">
+                <image href="src/collaborative_learning.png" x="0" y="0" width="100" height="100"
+                  preserveAspectRatio="xMidYMid slice" />
+              </g>
+              <!-- Outline -->
+              <path
+                d="M 50,5 C 75,5 95,20 95,35 C 95,50 80,50 70,50 C 80,50 95,50 95,65 C 95,80 75,95 50,95 C 25,95 5,80 5,65 C 5,50 20,50 30,50 C 20,50 5,50 5,35 C 5,20 25,5 50,5 Z"
+                fill="none" stroke="black" stroke-width="2.5" />
+            </svg>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 7: Join evalX Now Yellow Banner Bento Card -->
+      <section class="bento-card-join">
+
+        <!-- Existing SVGs -->
+        <svg class="join-graphic-web" viewBox="0 0 200 200">
+          <path d="M 0,200 L 200,200 M 0,200 L 0,0 M 0,200 L 200,0 M 0,200 L 140,0 M 0,200 L 0,140" stroke="black"
+            stroke-width="2" fill="none" />
+          <path d="M 40,200 A 160,160 0 0,1 200,40" stroke="black" stroke-width="2" fill="none" />
+          <path d="M 80,200 A 120,120 0 0,1 200,80" stroke="black" stroke-width="2" fill="none" />
+          <path d="M 120,200 A 80,80 0 0,1 200,120" stroke="black" stroke-width="2" fill="none" />
+        </svg>
+
+        
+
+        <div class="join-content">
+
+          <div class="join-badge">
+            ✦ AI Academic Intelligence
+          </div>
+
+          <h2 class="join-title">
+            Turn Marks Into Meaning.
+          </h2>
+
+          <p class="join-desc">
+            Track semester performance, discover weak subjects, receive AI-powered academic guidance, and help faculty
+            support every student with data-driven insights.
+          </p>
+
+          <button class="brutal-btn" id="btn-join-start" onclick="document.getElementById('page-student-form').click?.() || (document.querySelector('[data-page=student-form]') || document.getElementById('btn-hero-start'))?.click()" style="background:var(--color-yellow);padding:.9rem 2.4rem;font-size:.95rem;border-radius:9999px;box-shadow:4px 4px 0 #000;">
+            START YOUR ANALYSIS →
+          </button>
+
+          <div class="join-stats">
+
+            <div class="join-stat">
+              <h3>8+</h3>
+              <span>Branches</span>
+            </div>
+
+            <div class="join-stat">
+              <h3>10</h3>
+              <span>Student Groups</span>
+            </div>
+
+            <div class="join-stat">
+              <h3>AI</h3>
+              <span>Performance Insights</span>
+            </div>
+
+          </div>
+
+        </div>
+
+        <div class="join-ghost">
+          evalX
+        </div>
+
+      </section>
+
+      <!-- SECTION 8: Footer Bento Card -->
+      <footer class="brutal-footer">
+        <div class="footer-top">
+          <div style="max-width: 280px;">
+            <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:1rem;">
+              <span style="font-size:1.5rem;">⚡</span>
+              <span style="font-family:var(--font-brutal-display); font-weight:900; font-size:1.6rem;">evalX</span>
+            </div>
+            <p style="font-size:0.85rem; color:var(--text-muted);">
+              Cognitive Academic Diagnostic System built for CV Raman Global University.
+            </p>
+          </div>
+
+          <div style="display:flex; gap:4rem; flex-wrap:wrap;">
+            <div>
+              <h4
+                style="font-size:0.85rem; text-transform:uppercase; margin-bottom:1rem; font-family:var(--font-brutal-mono);">
+                Who We Serve</h4>
+              <ul
+                style="list-style:none; font-size:0.85rem; display:flex; flex-direction:column; gap:0.5rem; color:var(--text-secondary);">
+                <li>B.Tech Students</li>
+                <li>Diploma & ITI Scholars</li>
+                <li>Faculty Advisors</li>
+                <li>Academic Deans</li>
+              </ul>
+            </div>
+
+            <div>
+              <h4
+                style="font-size:0.85rem; text-transform:uppercase; margin-bottom:1rem; font-family:var(--font-brutal-mono);">
+                Platform</h4>
+              <ul
+                style="list-style:none; font-size:0.85rem; display:flex; flex-direction:column; gap:0.5rem; color:var(--text-secondary);">
+                <li>Student Diagnostics</li>
+                <li>Nvidia NIM Guidance</li>
+                <li>Cohort Management</li>
+                <li>Transcript Audit</li>
+              </ul>
+            </div>
+
+            <div>
+              <h4
+                style="font-size:0.85rem; text-transform:uppercase; margin-bottom:1rem; font-family:var(--font-brutal-mono);">
+                Institution</h4>
+              <ul
+                style="list-style:none; font-size:0.85rem; display:flex; flex-direction:column; gap:0.5rem; color:var(--text-secondary);">
+                <li>CV Raman Global Univ</li>
+                <li>Department of CSE</li>
+                <li>Documentation</li>
+                <li>System Status</li>
+                <li><a id="btn-footer-reset"
+                    style="color:var(--color-danger); cursor:pointer; text-decoration:none; font-weight:700;">Reset
+                    Database</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="footer-bottom">
+          <span style="font-size:0.8rem;">Copyright © 2026 evalX Runtime System. All Rights Reserved.</span>
+          <div style="display:flex; gap:0.75rem;">
+            <span
+              style="border:2px solid #000; border-radius:50%; width:32px; height:32px; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:0.75rem;">𝕏</span>
+            <span
+              style="border:2px solid #000; border-radius:50%; width:32px; height:32px; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:0.75rem;">in</span>
+            <span
+              style="border:2px solid #000; border-radius:50%; width:32px; height:32px; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:0.75rem;">git</span>
+          </div>
+        </div>
+      </footer>
+
+    </main>
+
+    <!-- Page: STUDENT DYNAMIC REGISTRATION FORM (FULLSCREEN SPLIT WIZARD) -->
+    <main id="page-student-form" class="page">
+      <div class="fullscreen-split">
+        <!-- Left: Yellow Panel / Step Info -->
+        <div class="split-left">
+          <div>
+            <span class="mono-tag">// ENROLMENT INITIALIZATION</span>
+            <h2 style="font-size: 3rem; line-height: 1; margin-top: 1rem; text-transform:none;">Student Profile</h2>
+            <p class="text-secondary mt-2" style="font-size: 0.85rem; color:var(--text-secondary);">
+              Fill in details to compute your academic index and map curricular deficiencies.
+            </p>
+          </div>
+
+          <!-- Step Bars -->
+          <div>
+            <div class="step-bar-wrap">
+              <div class="step-bar active" data-step="1"></div>
+              <div class="step-bar" data-step="2"></div>
+              <div class="step-bar" data-step="3"></div>
+              <div class="step-bar" data-step="4"></div>
+            </div>
+            <p style="font-size:0.75rem; font-weight:800;" id="step-count-text">STEP 1 OF 4: BASIC DETAILS</p>
+          </div>
+        </div>
+
+        <!-- Right: Scrollable Forms -->
+        <div class="split-right">
+          <!-- Step 1: Core Details -->
+          <div class="form-step active" id="student-step-1" style="width:100%;">
+            <h2 style="font-size:2rem; margin-bottom:2rem; text-transform:none;">Basic Particulars</h2>
+
+            <div class="form-group" style="margin-bottom:1.5rem; position:relative;">
+              <label class="brutal-label" for="student-name">Full Student Name *</label>
+              <input type="text" id="student-name" class="brutal-input" placeholder="e.g. Priyadarshi Nayak"
+                autocomplete="off" required>
+              <div id="autocomplete-name-list" class="autocomplete-dropdown"></div>
+            </div>
+
+            <div class="form-group" style="margin-bottom:1.5rem; position:relative;">
+              <label class="brutal-label" for="student-reg">Registration Number (Red Number) *</label>
+              <input type="text" id="student-reg" class="brutal-input" placeholder="e.g. 230120104" autocomplete="off"
+                required>
+              <div id="autocomplete-reg-list" class="autocomplete-dropdown"></div>
+            </div>
+
+            <div class="form-group" style="margin-bottom:1.5rem;">
+              <label class="brutal-label" for="student-college">College Institution *</label>
+              <select id="student-college" class="brutal-select">
+                <option value="C. V. Raman Global University">C. V. Raman Global University (CVRGU)</option>
+                <option value="KIIT University">KIIT University</option>
+                <option value="SOA University">Siksha 'O' Anusandhan (SOA)</option>
+                <option value="IIT Bhubaneswar">IIT Bhubaneswar</option>
+              </select>
+            </div>
+
+            <div class="form-group" style="margin-bottom:1.5rem;">
+              <label class="brutal-label" for="student-branch">Engineering Branch *</label>
+              <select id="student-branch" class="brutal-select">
+                <option value="CSE">CSE</option>
+                <option value="CSIT">CSIT</option>
+                <option value="AIML">AIML</option>
+                <option value="AI&DS">AI&DS</option>
+                <option value="SE">SE</option>
+                <option value="CE">CE</option>
+                <option value="DS">DS</option>
+                <option value="WD">WD</option>
+              </select>
+            </div>
+
+            <div class="form-group" style="margin-bottom:1.5rem;">
+              <label class="brutal-label" for="student-group">Group Assignment (1-10) *</label>
+              <select id="student-group" class="brutal-select">
+                <option value="1">Group 1</option>
+                <option value="2">Group 2</option>
+                <option value="3">Group 3</option>
+                <option value="4" selected>Group 4</option>
+                <option value="5">Group 5</option>
+                <option value="6">Group 6</option>
+                <option value="7">Group 7</option>
+                <option value="8">Group 8</option>
+                <option value="9">Group 9</option>
+                <option value="10">Group 10</option>
+              </select>
+            </div>
+
+            <div class="form-navigation">
+              <button class="brutal-btn btn-student-cancel">Exit Setup</button>
+              <button class="brutal-btn brutal-btn-accent btn-student-next" data-next="2">Next Step →</button>
+            </div>
+          </div>
+
+          <!-- Step 2: Academic History timeline setup -->
+          <div class="form-step" id="student-step-2" style="width:100%;">
+            <h2 style="font-size:2rem; margin-bottom:1rem; text-transform:none;">Prior Education Timeline</h2>
+            <p style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:2rem;">Configure education timeline.
+              Click boxes to toggle completions.</p>
+
+            <div class="timeline-grid"
+              style="display:grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap:1rem;">
+              <div class="glass-card selected" id="tc-10th" style="pointer-events: none; text-align:center;">
+                <input type="checkbox" id="chk-10th" checked disabled style="display:none;">
+                <span class="timeline-icon" style="font-size:1.5rem; display:block; margin-bottom:0.5rem;">📝</span>
+                <span class="timeline-title" style="font-weight:700; font-size:0.9rem;">10th Grade</span>
+              </div>
+
+              <div class="glass-card" id="tc-12th" style="cursor:pointer; text-align:center;">
+                <input type="checkbox" id="chk-12th" style="display:none;">
+                <span class="timeline-icon" style="font-size:1.5rem; display:block; margin-bottom:0.5rem;">🧪</span>
+                <span class="timeline-title" style="font-weight:700; font-size:0.9rem;">12th Grade</span>
+              </div>
+
+              <div class="glass-card" id="tc-iti" style="cursor:pointer; text-align:center;">
+                <input type="checkbox" id="chk-iti" style="display:none;">
+                <span class="timeline-icon" style="font-size:1.5rem; display:block; margin-bottom:0.5rem;">⚙️</span>
+                <span class="timeline-title" style="font-weight:700; font-size:0.9rem;">ITI</span>
+              </div>
+
+              <div class="glass-card" id="tc-diploma" style="cursor:pointer; text-align:center;">
+                <input type="checkbox" id="chk-diploma" style="display:none;">
+                <span class="timeline-icon" style="font-size:1.5rem; display:block; margin-bottom:0.5rem;">📐</span>
+                <span class="timeline-title" style="font-weight:700; font-size:0.9rem;">Diploma</span>
+              </div>
+
+              <div class="glass-card" id="tc-btech" style="cursor:pointer; text-align:center;">
+                <input type="checkbox" id="chk-btech" style="display:none;">
+                <span class="timeline-icon" style="font-size:1.5rem; display:block; margin-bottom:0.5rem;">⚡</span>
+                <span class="timeline-title" style="font-weight:700; font-size:0.9rem;">B.Tech</span>
+              </div>
+            </div>
+
+            <!-- Conditional B.Tech enrollment details -->
+            <div id="section-btech-status" style="display:none; margin-top:2.5rem;">
+              <h3 style="font-size:1.5rem; margin-bottom:1.5rem; text-transform:none;">Current B.Tech Status</h3>
+              <div class="form-group">
+                <label class="brutal-label" for="student-btech-sem">Current Semester enrolled in *</label>
+                <select id="student-btech-sem" class="brutal-select">
+                  <option value="1">1st Semester</option>
+                  <option value="2">2nd Semester</option>
+                  <option value="3">3rd Semester</option>
+                  <option value="4">4th Semester</option>
+                  <option value="5">5th Semester</option>
+                  <option value="6" selected>6th Semester</option>
+                  <option value="7">7th Semester</option>
+                  <option value="8">8th Semester</option>
+                </select>
+              </div>
+
+              <div class="form-group mt-4" style="margin-top:1.5rem;">
+                <div style="display:flex; align-items:center;">
+                  <input type="checkbox" id="student-btech-completed"
+                    style="width:20px; height:20px; cursor:pointer; margin-right:1rem;">
+                  <label for="student-btech-completed"
+                    style="font-family:var(--font-brutal-display); font-weight:700; cursor:pointer;">Current semester
+                    grades are fully published</label>
+                </div>
+              </div>
+
+              <p style="font-size:0.85rem; font-weight:700; color:var(--color-danger); margin-top:2rem;"
+                id="sem-filling-notice">
+                Notice: Filling marks up to Sem 5.
+              </p>
+            </div>
+
+            <div class="form-navigation">
+              <button class="brutal-btn btn-student-prev" data-prev="1">← Back</button>
+              <button class="brutal-btn brutal-btn-accent btn-student-next" id="btn-to-step3" data-next="3">Next Step
+                →</button>
+            </div>
+          </div>
+
+          <!-- Step 3: Prior scores entry -->
+          <div class="form-step" id="student-step-3" style="width:100%;">
+            <h2 style="font-size:2rem; margin-bottom:2rem; text-transform:none;">Schooling & Vocational Marks</h2>
+
+            <div id="section-10th-marks">
+              <h3
+                style="font-size:1.2rem; border-bottom:2px solid var(--border-brutal); padding-bottom:0.5rem; margin-bottom:1.5rem; text-transform:none;">
+                10th Standard Marks</h3>
+              <div class="form-group">
+                <label class="brutal-label" for="marks-10th-board">Board Name</label>
+                <input type="text" id="marks-10th-board" class="brutal-input" placeholder="e.g. CBSE, ICSE, BSE Odisha">
+              </div>
+              <div class="form-group" style="margin-top:1.5rem;">
+                <label class="brutal-label" for="marks-10th-score">Total Score Percentage / CGPA *</label>
+                <input type="number" id="marks-10th-score" class="brutal-input" placeholder="e.g. 92.5 or 9.5"
+                  step="0.01" min="0" max="100">
+              </div>
+            </div>
+
+            <div id="section-12th-marks" style="display:none;" class="mt-6">
+              <h3
+                style="font-size:1.2rem; border-bottom:2px solid var(--border-brutal); padding-bottom:0.5rem; margin-bottom:1.5rem; text-transform:none; margin-top:2rem;">
+                12th Standard Marks</h3>
+              <div class="form-group">
+                <label class="brutal-label" for="marks-12th-board">Board Name</label>
+                <input type="text" id="marks-12th-board" class="brutal-input" placeholder="e.g. CHSE, CBSE, ISC">
+              </div>
+              <div class="form-group" style="margin-top:1.5rem;">
+                <label class="brutal-label" for="marks-12th-score">Total Score Percentage *</label>
+                <input type="number" id="marks-12th-score" class="brutal-input" placeholder="e.g. 88.6" step="0.01"
+                  min="0" max="100">
+              </div>
+            </div>
+
+            <div id="section-iti-marks" style="display:none;" class="mt-6">
+              <h3
+                style="font-size:1.2rem; border-bottom:2px solid var(--border-brutal); padding-bottom:0.5rem; margin-bottom:1.5rem; text-transform:none; margin-top:2rem;">
+                ITI Vocational Marks</h3>
+              <div class="form-group">
+                <label class="brutal-label" for="marks-iti-trade">ITI Trade Name</label>
+                <input type="text" id="marks-iti-trade" class="brutal-input"
+                  placeholder="e.g. Electrician, Machinist, Fitter">
+              </div>
+              <div class="form-group" style="margin-top:1.5rem;">
+                <label class="brutal-label" for="marks-iti-score">ITI Total Score Percentage *</label>
+                <input type="number" id="marks-iti-score" class="brutal-input" placeholder="e.g. 84.5" step="0.01"
+                  min="0" max="100">
+              </div>
+            </div>
+
+            <div id="section-diploma-marks" style="display:none;" class="mt-6">
+              <h3
+                style="font-size:1.2rem; border-bottom:2px solid var(--border-brutal); padding-bottom:0.5rem; margin-bottom:1.5rem; text-transform:none; margin-top:2rem;">
+                Diploma Marks</h3>
+              <div class="form-group">
+                <label class="brutal-label" for="marks-diploma-stream">Diploma Stream / Specialty</label>
+                <input type="text" id="marks-diploma-stream" class="brutal-input"
+                  placeholder="e.g. CSE, IT, Mechanical, Electrical">
+              </div>
+              <div class="form-group" style="margin-top:1.5rem;">
+                <label class="brutal-label" for="marks-diploma-score">Diploma Total Score CGPA / Percentage *</label>
+                <input type="number" id="marks-diploma-score" class="brutal-input" placeholder="e.g. 9.1 or 86.4"
+                  step="0.01" min="0" max="100">
+              </div>
+              <div class="form-group" style="margin-top:1.5rem;">
+                <label class="brutal-label" for="marks-diploma-weak">Prior Flagged Weak Subjects</label>
+                <input type="text" id="marks-diploma-weak" class="brutal-input"
+                  placeholder="e.g. Applied Mathematics, Solid Mechanics">
+              </div>
+            </div>
+
+            <div class="form-navigation">
+              <button class="brutal-btn btn-student-prev" data-prev="2">← Back</button>
+              <button class="brutal-btn brutal-btn-accent" id="btn-to-step4" data-next="4">Next Step →</button>
+            </div>
+          </div>
+
+          <!-- Step 4: B.Tech Sem Marks -->
+          <div class="form-step" id="student-step-4" style="width:100%;">
+            <div class="flex-between mb-4">
+              <h2 style="font-size:2rem; text-transform:none;">Engineering Semesters</h2>
+              <button class="brutal-btn brutal-btn-accent" id="btn-quick-fill">⚡ AUTOFILL MARKS</button>
+            </div>
+            <p style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:1.5rem;">
+              Provide marks (0-100) for each completed semester. Select tabs to switch semesters.
+            </p>
+
+            <!-- Neo-Brutalist Semester Tabs -->
+            <div id="btech-sem-tab-bar"
+              style="display:flex; gap:0.6rem; flex-wrap:wrap; margin-bottom:1.5rem; padding-bottom:0.75rem; border-bottom:2px solid var(--border-brutal);">
+              <!-- Dynamically populated [ Sem 1 ] [ Sem 2 ] tabs -->
+            </div>
+
+            <div class="semesters-container" id="btech-semesters-list">
+              <!-- Dynamically populated active semester block panels -->
+            </div>
+
+            <div class="form-navigation">
+              <button class="brutal-btn btn-student-prev" data-prev="3">← Back</button>
+              <button class="brutal-btn brutal-btn-dark" id="btn-student-submit">Complete Setup</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Page: STUDENT DASHBOARD -->
+    <main id="page-student-dashboard" class="page">
+      <div class="brutal-grid-layout">
+        <!-- Sidebar -->
+        <aside class="brutal-sidebar">
+          <div
+            style="text-align:center; padding-bottom:2rem; border-bottom:2px solid var(--border-brutal); margin-bottom:2rem;">
+            <div style="font-size:3rem; margin-bottom:1rem;">🎓</div>
+            <h3 id="dash-student-name">--</h3>
+            <p id="dash-student-reg"
+              style="font-size:0.8rem; font-family:var(--font-brutal-mono); color:var(--text-muted); margin-top:0.25rem;">
+              REG: --</p>
+            <span class="badge badge-primary" id="dash-student-badge" style="margin-top:0.75rem;">CSE - Group 4</span>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:0.75rem;">
+            <div class="nav-item active" data-tab="overview"
+              style="font-family:var(--font-brutal-display); font-weight:800; font-size:0.85rem; cursor:pointer; padding:0.75rem 1rem; border:2px solid var(--border-brutal); border-radius:9999px; display:flex; gap:0.5rem; background:#fff;">
+              <span>📊</span> OVERVIEW
+            </div>
+            <div class="nav-item" data-tab="weakness"
+              style="font-family:var(--font-brutal-display); font-weight:800; font-size:0.85rem; cursor:pointer; padding:0.75rem 1rem; border:2px solid var(--border-brutal); border-radius:9999px; display:flex; gap:0.5rem; background:#fff;">
+              <span>⚠️</span> DOMAIN GAPS
+            </div>
+            <div class="nav-item" data-tab="ai-guidance"
+              style="font-family:var(--font-brutal-display); font-weight:800; font-size:0.85rem; cursor:pointer; padding:0.75rem 1rem; border:2px solid var(--border-brutal); border-radius:9999px; display:flex; gap:0.5rem; background:#fff;">
+              <span>🤖</span> NVIDIA AI COACH
+            </div>
+            <div class="nav-item btn-open-api-config"
+              style="font-family:var(--font-brutal-display); font-weight:800; font-size:0.85rem; cursor:pointer; padding:0.75rem 1rem; border:2px solid var(--border-brutal); border-radius:9999px; display:flex; gap:0.5rem; background:#fff;">
+              <span>⚙️</span> AI CONFIG
+            </div>
+            <div class="nav-item" id="btn-student-logout"
+              style="font-family:var(--font-brutal-display); font-weight:800; font-size:0.85rem; cursor:pointer; padding:0.75rem 1rem; border:2px solid var(--border-brutal); border-radius:9999px; color:var(--color-danger); display:flex; gap:0.5rem; margin-top:2rem; background:#fff;">
+              <span>🚪</span> EXIT SESSION
+            </div>
+          </div>
+        </aside>
+
+        <!-- Content -->
+        <section class="brutal-content-area">
+          <!-- Tab 1: Overview -->
+          <div class="tab-content active" id="student-tab-overview">
+            <div class="dashboard-panel">
+              <span class="mono-tag"
+                style="background:var(--color-yellow); border:1px solid #000; padding:0.1rem 0.4rem; border-radius:0.25rem;">//
+                LIVE PERFORMANCE METRICS</span>
+              <h2 style="font-size:2.5rem; margin-top:0.75rem; margin-bottom:2rem; text-transform:none;">Cognitive
+                Overview</h2>
+
+              <div class="dashboard-card-grid">
+                <div class="dashboard-metrics-card accent">
+                  <p style="font-size:0.75rem; font-weight:700; color:var(--text-primary);">B.TECH CGPA</p>
+                  <p style="font-family:var(--font-brutal-display); font-size:3rem; font-weight:900; line-height:1; color:#000;"
+                    id="dash-cgpa">0.00</p>
+                </div>
+                <div class="dashboard-metrics-card secondary">
+                  <p style="font-size:0.75rem; font-weight:700; color:var(--text-primary);">COLLEGE</p>
+                  <p style="font-family:var(--font-brutal-display); font-size:1.1rem; font-weight:800; line-height:1.2; color:#000; word-break:break-word; margin-top:0.25rem;"
+                    id="dash-college-name">--</p>
+                </div>
+                <div class="dashboard-metrics-card success">
+                  <p style="font-size:0.75rem; font-weight:700; color:var(--text-primary);">EVALUATED COURSES</p>
+                  <p style="font-family:var(--font-brutal-display); font-size:3rem; font-weight:900; line-height:1; color:#000;"
+                    id="dash-total-subjects">0</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Trend Graphic -->
+            <div class="dashboard-panel">
+              <h3 style="font-size:1.5rem; margin-bottom:1.5rem; text-transform:none;">Semester Performance Trends</h3>
+              <div class="chart-container"
+                style="height:250px; background:#fff; border:var(--border-width) solid var(--border-brutal); padding:1rem; overflow:hidden;">
+                <div id="sgpa-chart-placeholder"
+                  style="display:none; height:100%; align-items:center; justify-content:center; color:var(--text-muted);">
+                  Insufficient semester points to draw visual vector path.
+                </div>
+                <svg class="chart-svg" id="sgpa-trend-svg">
+                  <defs>
+                    <linearGradient id="chart-gradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stop-color="var(--color-danger)" />
+                      <stop offset="100%" stop-color="var(--color-yellow)" />
+                    </linearGradient>
+                    <linearGradient id="area-gradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stop-color="var(--color-blue)" />
+                      <stop offset="100%" stop-color="transparent" />
+                    </linearGradient>
+                  </defs>
+                  <g id="chart-grid"></g>
+                  <path class="chart-area" id="chart-area-path" />
+                  <path class="chart-line" id="chart-line-path" />
+                  <g id="chart-dots"></g>
+                  <g id="chart-labels"></g>
+                </svg>
+              </div>
+            </div>
+
+            <!-- Focus Warning block -->
+            <div class="brutal-alert-strip" id="dashboard-weakness-banner">
+              <div class="brutal-alert-strip-left">⚠️</div>
+              <div>
+                <h4 style="color:var(--text-primary); font-size:1.35rem; text-transform:none;" class="weakness-title">
+                  Focus Target Fields (Weak Subjects)</h4>
+                <p style="font-size:0.85rem; color:var(--text-secondary); margin-top:0.25rem;"
+                  id="weakness-summary-text">
+                  The diagnostics engine has parsed B.Tech scores under safety margins. Realign study patterns for these
+                  subjects.
+                </p>
+                <div class="brutal-subject-grid mt-4" id="dash-weak-subjects-container" style="margin-top:1.5rem;">
+                  <!-- Generated dynamic blocks -->
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab 2: Focus Details -->
+          <div class="tab-content" id="student-tab-weakness">
+            <div class="dashboard-panel">
+              <h2 style="font-size:2rem; margin-bottom:1rem; text-transform:none;">Structural Deficiencies</h2>
+              <p style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:2rem;">Detailed curriculum
+                breakdown of domains scoring below 50% threshold.</p>
+
+              <div id="full-weak-list" style="display:flex; flex-direction:column; gap:1.5rem;">
+                <!-- Full weakness detail elements -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab 3: AI Advice -->
+          <div class="tab-content" id="student-tab-ai-guidance">
+            <div class="dashboard-panel">
+              <div style="border-bottom:2px solid var(--border-brutal); padding-bottom:1.5rem; margin-bottom:2rem;"
+                class="flex-between">
+                <div>
+                  <span class="mono-tag"
+                    style="background:var(--color-yellow); border:1px solid #000; padding:0.2rem 0.5rem; border-radius:0.25rem;">NVIDIA
+                    COGNITIVE PLATFORM</span>
+                  <h2 style="font-size:2rem; margin-top:0.75rem; text-transform:none;">AI Cognitive Advisor</h2>
+                </div>
+                <div style="display:flex; gap:0.5rem;">
+                  <button class="brutal-btn btn-open-api-config"
+                    style="font-size:0.85rem; padding:0.5rem 1rem; background:#fff;">⚙️ AI Config</button>
+                  <button class="brutal-btn brutal-btn-accent" id="btn-trigger-ai" style="padding:0.5rem 1rem;">✨ Ask AI
+                    Advisor</button>
+                </div>
+              </div>
+
+              <div class="ai-response-box" id="ai-response-container"
+                style="background:#fff; border:var(--border-width) solid var(--border-brutal); border-radius:16px; padding:2rem; min-height:200px; box-shadow:4px 4px 0px var(--border-brutal);">
+                <div class="text-center" id="ai-loading" style="display:none; padding:2rem 0;">
+                  <div class="brutal-spinner"></div>
+                  <p style="font-size:0.85rem; color:var(--text-secondary); margin-top:1rem;">Compiling academic history
+                    ledger & invoking Nvidia Llama inference...</p>
+                </div>
+
+                <div id="ai-prompt-box">
+                  <h3 style="font-size:1.25rem; margin-bottom:1rem; text-transform:none;">Execute Nvidia Cloud NIM
+                    Advisor</h3>
+                  <p style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:2rem;">
+                    Nvidia Cloud systems analyze your grades structure, ITI/Diploma records, and focus domains to create
+                    an optimized study plan.
+                  </p>
+                  <div
+                    style="border-left:4px solid var(--color-danger); background:var(--bg-brutal); padding:1.25rem; border-radius:8px; border:var(--border-width) solid #000;">
+                    <h4 style="font-size:0.95rem; margin-bottom:0.25rem; text-transform:none;">API Key Authentication
+                      Required</h4>
+                    <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:1rem;">
+                      Without an API key, evalX uses a static local compilation database. Enter an API key to route
+                      queries directly to Nvidia Llama.
+                    </p>
+                    <button class="brutal-btn btn-open-api-config"
+                      style="font-size:0.75rem; padding:0.4rem 0.9rem; background:#fff;">⚙️ Configure API Key</button>
+                  </div>
+                </div>
+
+                <div id="ai-result-content"
+                  style="display:none; font-family:var(--font-brutal-mono); font-size:0.85rem; color:var(--text-secondary); line-height:1.7;">
+                  <!-- Dynamic markdown or HTML output -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <!-- Page: TEACHER SIGN UP (FULLSCREEN SPLIT WIZARD) -->
+    <main id="page-teacher-signup" class="page">
+      <div class="fullscreen-split">
+        <!-- Left panel (Green) -->
+        <div class="split-left" style="background:var(--color-green);">
+          <div>
+            <span class="mono-tag">// REGISTRATION GATEWAY</span>
+            <h2 style="font-size: 3rem; line-height: 1; margin-top: 1rem; text-transform:none;">Faculty Registration
+            </h2>
+            <p style="font-size: 0.85rem; color: var(--text-primary); margin-top: 1rem;">
+              Create your educator profile. Selecting group assignments triggers administrative authorization before
+              active session.
+            </p>
+          </div>
+          <p style="font-size:0.75rem; font-weight:800;">
+            SYSTEM SECURED // C. V. RAMAN GLOBAL UNIVERSITY DEPT. CSE
+          </p>
+        </div>
+
+        <!-- Right panel -->
+        <div class="split-right">
+          <h2 style="font-size:2rem; margin-bottom:2.5rem; text-transform:none;">Academic Account Creation</h2>
+
+          <form id="form-teacher-signup">
+            <div class="form-group" style="margin-bottom:1.25rem;">
+              <label class="brutal-label" for="teacher-name">Full Faculty Name *</label>
+              <input type="text" id="teacher-name" class="brutal-input" placeholder="e.g. Prof. R K Nayak" required>
+            </div>
+
+            <div class="form-group mt-4" style="margin-bottom:1.25rem;">
+              <label class="brutal-label" for="teacher-email">Work Email Address *</label>
+              <input type="email" id="teacher-email" class="brutal-input" placeholder="e.g. prof.nayak@cvrgi.edu.in"
+                required>
+            </div>
+
+            <div class="form-group mt-4" style="margin-bottom:1.25rem;">
+              <label class="brutal-label" for="teacher-password">Access Password *</label>
+              <input type="password" id="teacher-password" class="brutal-input" placeholder="••••••••" required>
+            </div>
+
+            <div class="form-group mt-4" style="margin-bottom:1.25rem;">
+              <label class="brutal-label" for="teacher-college">Assigned College</label>
+              <select id="teacher-college" class="brutal-select">
+                <option value="C. V. Raman Global University">C. V. Raman Global University (CVRGU)</option>
+              </select>
+            </div>
+
+            <div class="form-group mt-4" style="margin-bottom:1.25rem;">
+              <label class="brutal-label" for="teacher-branch">Branch Department *</label>
+              <select id="teacher-branch" class="brutal-select">
+                <option value="CSE">CSE</option>
+                <option value="CSIT">CSIT</option>
+                <option value="AIML">AIML</option>
+                <option value="AI&DS">AI&DS</option>
+                <option value="SE">SE</option>
+                <option value="CE">CE</option>
+                <option value="DS">DS</option>
+                <option value="WD">WD</option>
+              </select>
+            </div>
+
+            <div class="form-group mt-4" style="margin-bottom:1.25rem;">
+              <label class="brutal-label" for="teacher-group">Assigned Group Lead (1-10) *</label>
+              <select id="teacher-group" class="brutal-select">
+                <option value="1">Group 1</option>
+                <option value="2">Group 2</option>
+                <option value="3">Group 3</option>
+                <option value="4" selected>Group 4</option>
+                <option value="5">Group 5</option>
+                <option value="6">Group 6</option>
+                <option value="7">Group 7</option>
+                <option value="8">Group 8</option>
+                <option value="9">Group 9</option>
+                <option value="10">Group 10</option>
+              </select>
+            </div>
+
+            <div class="form-navigation">
+              <button type="button" class="brutal-btn btn-teacher-cancel">Back</button>
+              <button type="submit" class="brutal-btn brutal-btn-dark">Submit Request</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </main>
+
+    <!-- Page: TEACHER PENDING APPROVAL (FULLSCREEN WIZARD STATUS) -->
+    <main id="page-teacher-pending" class="page">
+      <div class="fullscreen-split" style="grid-template-columns: 1fr;">
+        <div class="split-right"
+          style="align-items:center; justify-content:center; text-align:center; max-width:650px; margin:0 auto; background:var(--bg-brutal);">
+          <div style="font-size:5rem; margin-bottom:2rem; animation: brutalSpin 5s linear infinite;">⏳</div>
+          <h2 style="font-size:2.5rem; margin-bottom:1rem; text-transform:none;">Administrative Validation Required</h2>
+          <p style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:2rem;">
+            Your request to lead <strong id="pending-group-tag"
+              style="background:var(--color-pink); padding:0.1rem 0.5rem; border:2px solid #000; border-radius:5px;">CSE
+              - Group 4</strong> has been logged. Security credentials must be authorized by system admins before active
+            session.
+          </p>
+
+          <div
+            style="border:var(--border-width) solid var(--border-brutal); background:#fff; border-radius:12px; padding:1.5rem; width:100%; text-align:left; font-size:0.85rem; margin-bottom:2rem; box-shadow:4px 4px 0 #000;">
+            <p><b>Pending Account Identity:</b> <span id="pending-email-tag">prof@cvrgi.edu.in</span></p>
+            <p style="margin-top:0.25rem;"><b>Authority Node:</b> CV Raman Group Lead</p>
+          </div>
+
+          <div style="display:flex; gap:1.5rem;">
+            <button class="brutal-btn brutal-btn-green" id="btn-pending-refresh">Check Approval Status</button>
+            <button class="brutal-btn" id="btn-pending-logout"
+              style="color:var(--color-danger); border-color:var(--color-danger); background:#fff;">Exit
+              Session</button>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Page: TEACHER DASHBOARD -->
+    <main id="page-teacher-dashboard" class="page">
+      <div class="brutal-grid-layout">
+        <!-- Sidebar -->
+        <aside class="brutal-sidebar">
+          <div
+            style="text-align:center; padding-bottom:2rem; border-bottom:2px solid var(--border-brutal); margin-bottom:2rem;">
+            <div style="font-size:3rem; margin-bottom:1rem;">👨‍🏫</div>
+            <h3 id="teacher-dash-title">Professor</h3>
+            <p id="teacher-dash-subtitle"
+              style="font-size:0.75rem; color:var(--text-muted); margin-top:0.5rem; word-break:break-all;">CV Raman</p>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:0.75rem;">
+            <div class="nav-item active"
+              style="font-family:var(--font-brutal-display); font-weight:800; font-size:0.85rem; padding:0.75rem; border:2px solid var(--border-brutal); border-radius:9999px; background:#fff; text-align:center; cursor:pointer;">
+              👥 STUDENT ROSTER
+            </div>
+            <div class="nav-item btn-open-api-config"
+              style="font-family:var(--font-brutal-display); font-weight:800; font-size:0.85rem; padding:0.75rem; border:2px solid var(--border-brutal); border-radius:9999px; background:#fff; text-align:center; cursor:pointer; display:flex; gap:0.5rem; align-items:center; justify-content:center;">
+              ⚙️ AI CONFIG
+            </div>
+            <div class="nav-item" id="btn-teacher-logout"
+              style="font-family:var(--font-brutal-display); font-weight:800; font-size:0.85rem; cursor:pointer; padding:0.75rem; border:2px solid var(--border-brutal); border-radius:9999px; color:var(--color-danger); margin-top:4rem; background:#fff; text-align:center;">
+              🚪 SIGN OUT
+            </div>
+          </div>
+        </aside>
+
+        <!-- Content -->
+        <section class="brutal-content-area">
+          <div class="dashboard-panel">
+            <span class="mono-tag"
+              style="background:var(--color-green); border:1px solid #000; padding:0.1rem 0.4rem; border-radius:0.25rem;">//
+              ASSIGNED COHORT LIMITS</span>
+            <h2 style="font-size:2.5rem; margin-top:0.75rem; margin-bottom:2rem; text-transform:none;">Cohort Capacities
+            </h2>
+
+            <div class="dashboard-card-grid">
+              <div class="dashboard-metrics-card accent">
+                <p style="font-size:0.75rem; font-weight:700; color:var(--text-primary);">COHORT SIZE LIMIT</p>
+                <div class="flex-align mt-2" style="gap:1rem; margin-top:0.5rem;">
+                  <input type="number" id="input-group-target" class="brutal-input" value="30" min="1" max="100"
+                    style="padding:0.4rem; font-size:1.1rem; width:80px; text-align:center; box-shadow:2px 2px 0 #000;">
+                  <button class="brutal-btn brutal-btn-dark" id="btn-save-target"
+                    style="padding:0.5rem 1rem;">SAVE</button>
+                </div>
+              </div>
+              <div class="dashboard-metrics-card success">
+                <p style="font-size:0.75rem; font-weight:700; color:var(--text-primary);">REGISTERED STUDENTS</p>
+                <p style="font-family:var(--font-brutal-display); font-size:3rem; font-weight:900; line-height:1; color:#000;"
+                  id="teacher-val-signedup">0 / 30</p>
+              </div>
+              <div class="dashboard-metrics-card secondary">
+                <p style="font-size:0.75rem; font-weight:700; color:var(--text-primary);">REMAINING SLOTS</p>
+                <p style="font-family:var(--font-brutal-display); font-size:3rem; font-weight:900; line-height:1; color:#000;"
+                  id="teacher-val-remaining">30</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Students list table -->
+          <div class="dashboard-panel">
+            <h3 style="font-size:1.5rem; margin-bottom:1.5rem; text-transform:none;">Registered Student List</h3>
+            <div class="data-table-container">
+              <table class="data-table" id="teacher-students-table"
+                style="width:100%; border-collapse:collapse; text-align:left;">
+                <thead>
+                  <tr
+                    style="border-bottom:3px solid var(--border-brutal); font-family:var(--font-brutal-mono); font-size:0.8rem; color:var(--text-primary);">
+                    <th style="padding:1rem;">REGISTRATION NO</th>
+                    <th style="padding:1rem;">STUDENT NAME</th>
+                    <th style="padding:1rem;">SEMESTERS LOGGED</th>
+                    <th style="padding:1rem;">CGPA RATING</th>
+                    <th style="padding:1rem;">WEAK SUBJECT BADGES</th>
+                    <th style="padding:1rem;">ACTIONS</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <!-- Programmatically populated -->
+                </tbody>
+              </table>
+            </div>
+
+            <div id="teacher-empty-state" class="text-center"
+              style="display:none; padding:4rem 0; border:2px dashed var(--border-brutal); border-radius:12px; background:var(--bg-brutal);">
+              <div style="font-size:3rem;">📂</div>
+              <h4 style="margin-top:1rem; font-size:1.25rem; text-transform:none;">Roster Vacant</h4>
+              <p style="font-size:0.85rem; color:var(--text-muted); margin-top:0.5rem;">
+                No students matching your group index have completed signup yet.
+              </p>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <!-- Page: ADMIN LOGIN (FULLSCREEN SPLIT CREDENTIALS ENTRY) -->
+    <main id="page-admin-login" class="page">
+      <div class="fullscreen-split">
+        <!-- Left side (Yellow) -->
+        <div class="split-left" style="background:var(--color-yellow);">
+          <div>
+            <span class="mono-tag">// ADMINISTRATIVE AUTHENTICATION</span>
+            <h2 style="font-size: 3rem; line-height: 1; margin-top: 1rem; text-transform:none;">System Admin</h2>
+            <p style="font-size:0.85rem; color:var(--text-primary); margin-top:1rem;">
+              Authenticate master node access to approve registered teachers and monitor global metrics.
+            </p>
+          </div>
+          <p style="font-size:0.75rem; font-weight:800;">
+            evalX SECURITY PROTOCOL // VER 1.0.0
+          </p>
+        </div>
+
+        <!-- Right side -->
+        <div class="split-right" style="justify-content:center; background:var(--bg-brutal);">
+          <div style="max-width:460px; width:100%; margin:0 auto;">
+            <h2 style="font-size:2rem; margin-bottom:2.5rem; text-transform:none;">Admin Node Login</h2>
+
+            <form id="form-admin-login">
+              <div class="form-group">
+                <label class="brutal-label" for="admin-email">Admin Access Email</label>
+                <input type="email" id="admin-email" class="brutal-input" value="admin@evalx.com" required>
+              </div>
+
+              <div class="form-group mt-4" style="margin-top:1.5rem;">
+                <label class="brutal-label" for="admin-password">Administrator Password</label>
+                <input type="password" id="admin-password" class="brutal-input" placeholder="••••••••" required>
+              </div>
+
+              <div id="admin-login-error"
+                style="display:none; color:var(--color-danger); font-size:0.85rem; margin-top:1.5rem; font-weight:700;">
+                ❌ Authentication failed. Invalid credentials.
+              </div>
+
+              <div class="form-navigation">
+                <a href="#home" class="brutal-btn" style="background:#fff;">Home</a>
+                <button type="submit" class="brutal-btn brutal-btn-dark">Authenticate</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Page: ADMIN DASHBOARD -->
+    <main id="page-admin-dashboard" class="page">
+      <div class="brutal-grid-layout">
+        <!-- Sidebar -->
+        <aside class="brutal-sidebar">
+          <div
+            style="text-align:center; padding-bottom:2rem; border-bottom:2px solid var(--border-brutal); margin-bottom:2rem;">
+            <div style="font-size:3rem; margin-bottom:1rem;">💻</div>
+            <h3 style="text-transform:none;">Master Node</h3>
+            <p style="font-size:0.75rem; color:var(--text-muted); margin-top:0.25rem;">ADMINISTRATOR</p>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:0.75rem;">
+            <div class="nav-item active"
+              style="font-family:var(--font-brutal-display); font-weight:800; font-size:0.85rem; padding:0.75rem; border:2px solid var(--border-brutal); border-radius:9999px; background:#fff; text-align:center; cursor:pointer;">
+              ⚙️ DEPLOYMENT
+            </div>
+            <div class="nav-item btn-open-api-config"
+              style="font-family:var(--font-brutal-display); font-weight:800; font-size:0.85rem; padding:0.75rem; border:2px solid var(--border-brutal); border-radius:9999px; background:#fff; text-align:center; cursor:pointer; display:flex; gap:0.5rem; align-items:center; justify-content:center;">
+              🔧 AI CONFIG
+            </div>
+            <div class="nav-item" id="btn-admin-logout"
+              style="font-family:var(--font-brutal-display); font-weight:800; font-size:0.85rem; cursor:pointer; padding:0.75rem; border:2px solid var(--border-brutal); border-radius:9999px; color:var(--color-danger); margin-top:4rem; background:#fff; text-align:center;">
+              🚪 EXIT CONTROL
+            </div>
+          </div>
+        </aside>
+
+        <!-- Content -->
+        <section class="brutal-content-area">
+          <div class="dashboard-panel">
+            <span class="mono-tag"
+              style="background:var(--color-yellow); border:1px solid #000; padding:0.1rem 0.4rem; border-radius:0.25rem;">//
+              MASTER CONTROL DATABASE STATS</span>
+            <h2 style="font-size:2.5rem; margin-top:0.75rem; margin-bottom:2rem; text-transform:none;">System Overviews
+            </h2>
+
+            <div class="dashboard-card-grid">
+              <div class="dashboard-metrics-card secondary">
+                <p style="font-size:0.75rem; font-weight:700; color:var(--text-primary);">ACTIVE FACULTY ROSTER</p>
+                <p style="font-family:var(--font-brutal-display); font-size:3rem; font-weight:900; line-height:1; color:#000;"
+                  id="admin-val-teachers">0</p>
+              </div>
+              <div class="dashboard-metrics-card success">
+                <p style="font-size:0.75rem; font-weight:700; color:var(--text-primary);">TOTAL STUDENT ENROLLMENTS</p>
+                <p style="font-family:var(--font-brutal-display); font-size:3rem; font-weight:900; line-height:1; color:#000;"
+                  id="admin-val-students">0</p>
+              </div>
+              <div class="dashboard-metrics-card accent">
+                <p style="font-size:0.75rem; font-weight:700; color:var(--text-primary);">PENDING TEACHER APPROVALS</p>
+                <p style="font-family:var(--font-brutal-display); font-size:3rem; font-weight:900; line-height:1; color:#000;"
+                  id="admin-val-pending">0</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pending Requests Table -->
+          <div class="dashboard-panel">
+            <h3 style="font-size:1.5rem; margin-bottom:1.5rem; text-transform:none;">Pending Validation Requests</h3>
+            <div class="data-table-container">
+              <table class="data-table" id="admin-requests-table"
+                style="width:100%; border-collapse:collapse; text-align:left;">
+                <thead>
+                  <tr
+                    style="border-bottom:3px solid var(--border-brutal); font-family:var(--font-brutal-mono); font-size:0.8rem; color:var(--text-primary);">
+                    <th style="padding:1rem;">TEACHER NAME</th>
+                    <th style="padding:1rem;">EMAIL ADDRESS</th>
+                    <th style="padding:1rem;">COLLEGE</th>
+                    <th style="padding:1rem;">BRANCH</th>
+                    <th style="padding:1rem;">GROUP LEAD</th>
+                    <th style="padding:1rem;">VERIFICATION</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <!-- Programmatically populated -->
+                </tbody>
+              </table>
+            </div>
+
+            <div id="admin-requests-empty"
+              style="display:none; padding:3rem 0; text-align:center; border:2px dashed var(--border-brutal); border-radius:12px; background:var(--bg-brutal);">
+              <p style="color:var(--text-muted); font-weight:700;">All pending registration requests resolved.</p>
+            </div>
+          </div>
+
+          <!-- Active Teachers -->
+          <div class="dashboard-panel">
+            <h3 style="font-size:1.5rem; margin-bottom:1.5rem; text-transform:none;">Approved Faculty Roster</h3>
+            <div class="data-table-container">
+              <table class="data-table" id="admin-teachers-table"
+                style="width:100%; border-collapse:collapse; text-align:left;">
+                <thead>
+                  <tr
+                    style="border-bottom:3px solid var(--border-brutal); font-family:var(--font-brutal-mono); font-size:0.8rem; color:var(--text-primary);">
+                    <th style="padding:1rem;">TEACHER NAME</th>
+                    <th style="padding:1rem;">EMAIL</th>
+                    <th style="padding:1rem;">COLLEGE</th>
+                    <th style="padding:1rem;">BRANCH GROUP</th>
+                    <th style="padding:1rem;">STATUS</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <!-- Programmatically populated -->
+                </tbody>
+              </table>
+            </div>
+
+            <div id="admin-teachers-empty"
+              style="display:none; padding:3rem 0; text-align:center; border:2px dashed var(--border-brutal); border-radius:12px; background:var(--bg-brutal);">
+              <p style="color:var(--text-muted); font-weight:700;">No educators authorized yet.</p>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+
+
+  </div>
+
+  <!-- BRUTALIST MODAL: NVIDIA API CONFIGURATION -->
+  <div class="brutal-modal" id="modal-settings">
+    <div class="brutal-modal-backdrop" id="modal-settings-backdrop"></div>
+    <div class="brutal-modal-window">
+      <div class="brutal-modal-header">
+        <h3 style="font-size:1.25rem; text-transform:none;">Nvidia NIM Token Settings</h3>
+        <button class="brutal-btn" id="btn-close-settings"
+          style="padding:0.2rem 0.5rem; font-size:1rem; line-height:1; box-shadow:none;">&times;</button>
+      </div>
+      <div class="brutal-modal-body">
+        <p style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:1.5rem;">
+          Provide your Nvidia Developer NIM token key to activate deep scholastic Llama-3 parsing computations.
+        </p>
+
+        <div class="form-group">
+          <label class="brutal-label" for="input-api-key">Nvidia NIM Token</label>
+          <input type="password" id="input-api-key" class="brutal-input"
+            placeholder="nvapi-................................">
+        </div>
+
+        <div
+          style="border:var(--border-width) solid var(--border-brutal); background:var(--bg-brutal); padding:1.25rem; margin-top:2rem; font-size:0.85rem; border-radius:12px; box-shadow:4px 4px 0 #000;">
+          <p style="font-weight:700; color:#000;" class="mb-1">How to obtain a free key:</p>
+          <ol style="padding-left:1.25rem; color:var(--text-secondary);" class="mt-2">
+            <li>Visit the <a href="https://build.nvidia.com/" target="_blank"
+                style="color:var(--text-primary); text-decoration:underline; font-weight:700;">Nvidia Developer NIM
+                console</a>.</li>
+            <li>Claim free compute credits.</li>
+            <li>Copy and paste your generated token key above.</li>
+          </ol>
+        </div>
+      </div>
+      <div class="brutal-modal-footer">
+        <button class="brutal-btn" id="btn-clear-api-key" style="background:#fff;">Clear Key</button>
+        <button class="brutal-btn brutal-btn-dark" id="btn-save-api-key">Confirm Key</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- BRUTALIST MODAL: TEACHER VIEW STUDENT STUDY ROADMAP -->
+  <div class="brutal-modal" id="modal-student-detail">
+    <div class="brutal-modal-backdrop" id="modal-student-detail-backdrop"></div>
+    <div class="brutal-modal-window" style="max-width: 800px;">
+      <div class="brutal-modal-header">
+        <h3 id="modal-student-title" style="text-transform:none;">Student Academic Dossier</h3>
+        <button class="brutal-btn" id="btn-close-student-detail"
+          style="padding:0.2rem 0.5rem; font-size:1rem; line-height:1; box-shadow:none;">&times;</button>
+      </div>
+      <div class="brutal-modal-body">
+        <div style="display:grid; grid-template-columns: 2fr 1fr; gap:1.5rem; margin-bottom:2rem;">
+          <div
+            style="border:var(--border-width) solid var(--border-brutal); border-radius:16px; padding:1.5rem; background:#fff; box-shadow:4px 4px 0 #000;">
+            <p class="mono-tag"
+              style="background:var(--color-blue); padding:0.1rem 0.4rem; border:1px solid #000; border-radius:0.25rem; display:inline-block;">
+              // ENROLLMENT DETAILS</p>
+            <p id="modal-student-college" style="font-weight:800; font-size:1.15rem; color:#000; margin-top:0.75rem;">
+              C.V. Raman Global University</p>
+            <p id="modal-student-meta"
+              style="font-size:0.85rem; color:var(--text-secondary); margin-top:0.25rem; font-weight:700;">Branch: CSE |
+              Group: 4</p>
+          </div>
+          <div
+            style="border:var(--border-width) solid var(--border-brutal); border-radius:16px; padding:1.5rem; background:#fff; display:flex; flex-direction:column; justify-content:center; align-items:center; box-shadow:4px 4px 0 #000;">
+            <p class="mono-tag" style="font-size:0.75rem;">B.TECH CGPA</p>
+            <p id="modal-student-gpa"
+              style="font-family:var(--font-brutal-display); font-size:2.8rem; font-weight:900; color:var(--text-primary); line-height:1;">
+              0.00</p>
+          </div>
+        </div>
+
+        <h4 style="font-size:1.25rem; margin-bottom:1rem; text-transform:none;">Prior Academic Scores</h4>
+        <div id="modal-student-prior-records"
+          style="border:var(--border-width) solid var(--border-brutal); border-radius:12px; background:#fff; padding:1.5rem; margin-bottom:2rem; font-size:0.9rem; box-shadow:4px 4px 0 #000;">
+          <!-- Rendered programmatically -->
+        </div>
+
+        <h4 style="font-size:1.25rem; margin-bottom:1rem; text-transform:none;">Flagged Curricular Deficiencies</h4>
+        <div class="brutal-subject-grid mb-4" id="modal-student-weak-subjects"
+          style="grid-template-columns:1fr 1fr; margin-bottom:2rem;">
+          <!-- Rendered programmatically -->
+        </div>
+
+        <h4 style="font-size:1.25rem; margin-bottom:1rem; text-transform:none;">Nvidia AI Generated Guidance Plan</h4>
+        <div class="ai-response-box" id="modal-student-ai-box"
+          style="border:var(--border-width) solid var(--border-brutal); border-radius:16px; padding:1.5rem; background:#fff; box-shadow:4px 4px 0 #000;">
+          <div class="text-center" id="modal-student-ai-loading" style="display:none;">
+            <div class="brutal-spinner" style="width:2rem; height:2rem; margin:1rem auto;"></div>
+            <p style="font-size:0.75rem; color:var(--text-secondary);">Querying cloud models for study guidance
+              roadmap...</p>
+          </div>
+          <div id="modal-student-ai-result"
+            style="font-size:0.85rem; font-family:var(--font-brutal-mono); line-height:1.6; color:var(--text-secondary);">
+            <!-- Content -->
+          </div>
+        </div>
+      </div>
+      <div class="brutal-modal-footer">
+        <button class="brutal-btn" id="btn-close-student-detail-footer" style="background:#fff;">Close Dossier</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Custom Brutalist Dialog (Alert/Confirm) -->
+  <div class="brutal-modal" id="modal-brutal-dialog">
+    <div class="brutal-modal-backdrop" id="brutal-dialog-backdrop"></div>
+    <div class="brutal-modal-window" style="max-width: 480px; transform: scale(1);">
+      <div class="brutal-modal-header" style="background: var(--color-yellow);">
+        <h3 id="brutal-dialog-title" style="text-transform: none; font-size:1.1rem;">evalX System Message</h3>
+      </div>
+      <div class="brutal-modal-body" style="padding: 1.5rem 2rem;">
+        <p id="brutal-dialog-message"
+          style="font-family: var(--font-brutal-mono); font-size:0.85rem; color: var(--text-primary); line-height: 1.6;">
+        </p>
+      </div>
+      <div class="brutal-modal-footer" id="brutal-dialog-footer" style="padding: 1rem 2rem;">
+        <button class="brutal-btn" id="btn-brutal-dialog-cancel"
+          style="background:#fff; font-size:0.8rem; padding:0.4rem 1rem;">Cancel</button>
+        <button class="brutal-btn brutal-btn-dark" id="btn-brutal-dialog-ok"
+          style="font-size:0.8rem; padding:0.4rem 1rem;">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="src/student_records.js"></script>
+  <script src="src/app.js"></script>
+</body>
+
+</html>
